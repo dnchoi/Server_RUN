@@ -1,0 +1,67 @@
+#!/usr/bin/env python
+
+import os
+import argparse
+
+
+def get_model_path(path):
+    model_dir, server, model_name = path.split("/")
+
+
+def main():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("run", nargs=1)
+    parser.add_argument("-p", default="")
+
+    args = parser.parse_args()
+
+    root_path = "~/Documents/projects"
+
+    save_paths = {
+        "yolov5": "weights",
+        "yolov5-4.0": "runs/train",
+        "yolov3": "weights",
+        "yolov3-tf2": "weights",
+        "face-attribute-prediction": "weights",
+        "ssd": "weights",
+        "mobseg": "logs",
+        "kerasyolo": "logs",
+        "scnn": "save",
+        "swiftnet": "saves",
+        "deeplab": "run",
+        "ddr": "weights",
+    }
+
+    model_path = {
+        "ssd": "ssd.pytorch",
+        "mobseg": "mobile-segmentation",
+        "kerasyolo": "keras-YOLOv3-model-set",
+        "scnn": "Fast-SCNN_pytorch",
+        "swiftnet": "swiftnet",
+        "deeplab": "pytorch-deeplab-xception",
+        "ddr": "DDRNet.pytorch",
+    }
+
+    cmd = ""
+
+    model_type, server, model_name = args.run[0].split("/", 2)
+    model_dir = model_path[model_type] if model_type in model_path else model_type
+    path = os.path.join(root_path, model_dir, save_paths[model_type])
+
+    if args.p != "":
+        args.p += "-"
+
+    dest_path = os.path.expanduser(os.path.join(path, args.p + model_name))
+
+    if not os.path.exists(dest_path):
+        os.makedirs(dest_path)
+
+    cmd += f"rsync --exclude events.out.tfevents.* -avz {server}:{os.path.join(path, model_name, '*')} {dest_path}"
+
+    print(cmd)
+    os.system(cmd)
+
+
+if __name__ == "__main__":
+    main()

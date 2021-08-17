@@ -1,0 +1,53 @@
+#!/usr/bin/env python
+
+import glob
+import os
+import shutil
+import sys
+import time
+from datetime import date
+
+from tensorflow.python.summary.summary_iterator import summary_iterator
+
+
+def get_runtime(event_file):
+    min_time = sys.float_info.max
+    max_time = 0
+
+    try:
+        for e in summary_iterator(event_file):
+            min_time = min(min_time, e.wall_time)
+            max_time = max(max_time, e.wall_time)
+    except:
+        return sys.float_info.max, sys.float_info.max
+
+    delta = max_time - min_time
+
+    # print(delta)
+
+    return delta, max_time
+
+
+def main():
+    os.system("killall tensorboard")
+
+    thresh = 30 * 60  # require 30 min runtime
+    old_thresh = time.mktime(date.fromisoformat('2020-06-05').timetuple())
+
+    tb_dir = "/home/kevin/Documents/tensorboard/"
+
+    event_files = glob.glob(os.path.join(tb_dir, "**", "events.out.tfevents.*"), recursive=True)
+
+    unused_dirs = [os.path.dirname(e) for e in event_files if get_runtime(e)[0] < thresh]
+    # unused_dirs = [os.path.dirname(e) for e in event_files if get_runtime(e)[1] < old_thresh]
+
+    print(unused_dirs)
+
+    #for unused_dir in unused_dirs:
+    #    shutil.rmtree(unused_dir)
+
+    # get_runtime(event_file)
+
+
+if __name__ == "__main__":
+    main()

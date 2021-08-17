@@ -1,0 +1,93 @@
+#!/usr/bin/env python
+import argparse
+import os
+
+
+def main():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--server", default=[], nargs="*")
+    parser.add_argument("--proj", default=[], nargs="*")
+
+    args = parser.parse_args()
+
+    tensorboard_path = "~/Documents/tensorboard"
+    # sshfs = "sshfs -o default_permissions,allow_other,IdentityFile=/home/kevin/.ssh/id_ed25519.pub"
+    sshfs = "sshfs -o default_permissions,allow_other,idmap=user"
+
+    servers = [
+        # "nipa",
+        # "vcgpu",
+        "vcgpu2",
+        # "dngpu",
+    ]
+
+    proj_names = [
+        # "yolov3",
+        # "swiftnet",
+        # "shelfnet",
+        "yolov5",
+        # "yolov5-4.0",
+        #"face-attribute-prediction",
+        #"ssd",
+        #"mobseg",
+        # "kerasyolo",
+        # "scnn",
+        # "pilot",
+
+        #"deeplab",
+        # "ddr",
+        #"seanet",
+        #"centertrack",
+        # "hrnet-seg",
+        #"yolov3-new",
+        # "ssd",
+        # "CenterNet",
+    ]
+
+    proj_dirs = [
+        # "Documents/projects/yolov3/runs",
+        # "Documents/projects/swiftnet/runs",
+        # "Documents/projects/ShelfNet18_realtime/runs",
+        # "Documents/projects/yolov5/runs",
+        #"Documents/projects/yolov5-4.0/runs/train",
+        #"Documents/projects/face-attribute-prediction/runs",
+        #"Documents/projects/ssd.pytorch/runs",
+        #"Documents/projects/mobile-segmentation/logs",
+        # "Documents/projects/keras-YOLOv3-model-set/logs",
+        # "Documents/projects/Fast-SCNN_pytorch/runs",
+        # "Documents/projects/Autopilot-TensorFlow/runs"
+        #"Documents/projects/pytorch-deeplab-xception/run",
+        # "Documents/projects/DDRNet.pytorch/log",
+        #"Documents/projects/SEANet",
+        #"Documents/projects/CenterTrack/src/runs",
+        #"Documents/projects/HRNet-Semantic-Segmentation/log/",
+
+        #"/home/kevin/Documents/projects/yolov3-new/runs/train/",
+        # "Documents/projects/pytorch-ssd/runs",
+        # "Documents/projects/CenterNet/exp/",
+        "project/yolov5/runs"
+    ]
+
+    cmd = ""
+
+    cmd += "killall -9 tensorboard;\n"
+
+    for server in servers:
+        for proj_name, proj_dir in zip(proj_names, proj_dirs):
+            if (len(args.server) != 0 and server not in args.server) or (len(args.proj) != 0 and proj_name not in args.proj):
+                continue
+
+            cmd += \
+                f"mkdir -p {tensorboard_path}/{proj_name}/{server};\n" \
+                f"sudo umount {tensorboard_path}/{proj_name}/{server};\n" \
+                f"{sshfs} {server}:{proj_dir} {tensorboard_path}/{proj_name}/{server};\n"
+    cmd += f"nohup tensorboard --logdir={tensorboard_path} &"
+    cmd += "\n"
+
+    print(cmd)
+    os.system(cmd)
+
+
+if __name__ == "__main__":
+    main()

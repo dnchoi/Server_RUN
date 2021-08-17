@@ -1,0 +1,1 @@
+python .\server_tensorboard2 --server dngpu-0 --venv yolo --subdir /home/funzin/SSD1/old_project/yolov5s_bdd100k/ --event_dir runs --host 192.168.1.250

@@ -1,0 +1,52 @@
+#!/usr/bin/env python
+
+import os
+import argparse
+
+
+def get_model_path(path):
+    model_dir, server, model_name = path.split("/")
+
+
+def main():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("run", nargs="+")
+
+    args = parser.parse_args()
+
+    root_path = "~/Documents/projects"
+
+    save_paths = {
+        "yolov5": "runs",
+        "yolov3": "runs",
+        "yolov3-tf2": "runs",
+        "face-attribute-prediction": "runs",
+        "ssd": "runs"
+    }
+
+    model_path = {
+        "ssd": "ssd.pytorch"
+    }
+
+    cmd = ""
+
+    for run in args.run:
+        model_type, server, model_name = run.split("/")
+        model_dir = model_path[model_type] if model_type in model_path else model_type
+
+        assert isinstance(model_type, str) and len(model_type) > 0
+        assert isinstance(server, str) and len(server) > 0
+        assert isinstance(model_name, str) and len(model_name) > 0
+        assert isinstance(model_dir, str) and len(model_dir) > 0
+
+        path = os.path.join(root_path, model_dir, save_paths[model_type])
+
+        cmd += f"ssh {server} 'rm -rf {os.path.join(path, model_name)}'\n"
+
+    print(cmd)
+    os.system(cmd)
+
+
+if __name__ == "__main__":
+    main()

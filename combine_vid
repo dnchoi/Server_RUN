@@ -1,0 +1,82 @@
+#!/usr/bin/env python
+
+import cv2
+import numpy as np
+import argparse
+
+
+def make_img_grid(imgs):
+    if len(imgs) == 1:
+        return imgs[0]
+    else:
+        # n_cols = int(np.ceil(np.sqrt(len(imgs))))
+        # n_rows = int(np.ceil(len(imgs) / n_cols))
+        n_rows = int(np.ceil(np.sqrt(len(imgs))))
+        n_cols = int(np.ceil(len(imgs) / n_rows))
+
+        imgs = imgs + [np.zeros_like(imgs[0])] * (n_cols * n_rows - len(imgs))
+
+        rows = [np.concatenate(imgs[i * n_cols:(i + 1) * n_cols], axis=1) for i in range(n_rows)]
+
+        out = np.concatenate(rows, axis=0)
+
+        # out = cv2.resize(out, (out.shape[1] // n_cols, out.shape[0] // n_cols))
+        out = cv2.resize(out, (out.shape[1] // n_rows, out.shape[0] // n_rows))
+
+        return out
+
+
+def main():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("files", nargs="+")
+    parser.add_argument("-o", default="combine.avi")
+
+    args = parser.parse_args()
+
+    caps = [cv2.VideoCapture(f) for f in args.files]
+
+    cur_frames = [None] * len(caps)
+
+    writer = None
+
+    i = 0
+
+    vid_done = False
+
+    while True:
+        for idx, cap in enumerate(caps):
+            ret, frame = cap.read()
+            if ret is False:
+                print("Bad frame")
+                vid_done = True
+                # print(cap.isOpened())
+            else:
+                cur_frames[idx] = frame
+
+        if vid_done:
+            break
+
+        if (i + 1) % 50 == 0:
+            print(f"frame {i + 1}")
+
+        out_frame = make_img_grid(cur_frames)
+
+        if writer is None:
+            w, h = out_frame.shape[1], out_frame.shape[0]
+            fps = caps[0].get(cv2.CAP_PROP_FPS)
+            fourcc = cv2.VideoWriter_fourcc(*"XVID")
+            writer = cv2.VideoWriter(args.o, fourcc, fps, (w, h))
+
+        writer.write(out_frame)
+
+        i += 1
+
+    for cap in caps:
+        cap.release()
+
+    writer.release()
+
+
+if __name__ == "__main__":
+    main()

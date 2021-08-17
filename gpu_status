@@ -1,0 +1,64 @@
+#!/usr/bin/env python
+
+import subprocess
+
+
+def get_gpu_idx_pid(server):
+    smi_result = subprocess.run(['ssh', server, "nvidia-smi"], stdout=subprocess.PIPE).stdout.decode()
+
+    smi_data = [line.split() for line in smi_result.split("\n")]
+
+    gpu_idx_pid = [[line[1], line[-5]] for line in smi_data if len(line) > 3 and line[-4] == "C"]
+
+    return gpu_idx_pid
+
+
+def get_pid_cmdline(server, pid):
+    wd_cmd = subprocess.run(
+        f'ssh {server} "readlink -e /proc/{pid}/cwd/ && ps -p {pid} -o args --no-headers"', shell=True, stdout=subprocess.PIPE).stdout.decode().strip()
+
+    try:
+        wd, cmd = wd_cmd.split("\n")
+
+        return f"[{wd}] {cmd}"
+    except:
+        return f"other user"
+
+
+def main():
+    servers = [
+        "nipa",
+        "vcgpu",
+        "vcgpu2",
+        "vcgpu3"
+    ]
+
+    gpu_count = 2
+
+    gpu_server_idx_pid_cmdline = []
+
+    for server in servers:
+        gpu_idx_pid = get_gpu_idx_pid(server)
+
+        gpu_server_idx_pid_cmdline.append([
+            [idx, pid, get_pid_cmdline(server, pid)]
+        for idx, pid in gpu_idx_pid])
+
+    out = ""
+
+    for server_idx, server in enumerate(servers):
+        out += f"{server}:\n"
+        for gpu_idx in range(gpu_count):
+            process_name = [f"({line[1]}) {line[2]}" for line in gpu_server_idx_pid_cmdline[server_idx] if line[0] == str(gpu_idx)]
+
+            process_name = "\n".join(process_name) if len(process_name) > 0 else "free"
+
+            out += f"{gpu_idx}: {process_name}\n"
+
+        out += "\n"
+
+    print(out)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,74 @@
+#!/usr/bin/env python
+
+import argparse
+import os
+import sys
+from datetime import datetime
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+from util import get_opt_split
+
+
+def get_name_gpu(server):
+    assert "-" in server, "Specify gpu with -"
+    return server.rsplit("-", 1)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--venv", type=str)
+    parser.add_argument("--server", type=str)
+    parser.add_argument("--subdir", default=None)
+    parser.add_argument("--event_dir", default="runs")
+    parser.add_argument("--host", default="127.0.0.1")
+    parser.add_argument("--dir", default="/home/luke")
+    
+    exec_args, script_args = get_opt_split(parser)
+
+    user_dir = exec_args.dir
+
+    ssh_host, gpu = get_name_gpu(exec_args.server)
+    virt_env = exec_args.venv
+
+    local_proj_path = os.getcwd()
+
+    server_proj_path = local_proj_path
+
+    if exec_args.subdir is not None:
+        # server_proj_path = os.path.join(server_proj_path, exec_args.subdir)
+        server_proj_path = exec_args.subdir
+
+    venv_name = "anaconda3"
+        
+    conda_prof_path = f"{user_dir}/{venv_name}/etc/profile.d/conda.sh"
+    # script_path = exec_args.script[0]
+
+    # if script_path.endswith(".py"):
+    #     script_path = f"python {script_path}"
+
+    # log_dir = f"{user_dir}/Documents/logs"
+    # script_args_str = " ".join(script_args)
+    job_id = datetime.now().strftime('%y%m%d_%H%M%S')
+    print(job_id)
+    # cmd = "killall tensorboard;\n"
+
+    # output_file = f"{log_dir}/run_{job_id}.out"
+
+    # script_args_str += f" --job_id {job_id}"
+
+        # f"rsync -arvz {local_proj_path} {ssh_host}:{os.path.dirname(server_proj_path)} --exclude .git/ --exclude weights/ --exclude runs/ && " \
+    cmd = \
+        f"" \
+        f"ssh {ssh_host} '" \
+        f". {conda_prof_path};" \
+        f"conda activate {virt_env};" \
+        f"cd {server_proj_path};" \
+        f"tensorboard --logdir {exec_args.event_dir} --host {exec_args.host} ;'" \
+       
+    print(cmd)
+    os.system(cmd)
+
+
+if __name__ == "__main__":
+    main()

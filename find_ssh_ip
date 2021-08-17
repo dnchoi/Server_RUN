@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+
+import argparse
+import os
+import subprocess
+import threading
+from multiprocessing.pool import ThreadPool
+
+import psutil as psutil
+
+
+def check_host(search, user, host, timeout=10):
+    # cmd = "ls"
+    cmd = "cat .name"
+
+    try:
+        stdout_data, stderr_data = subprocess.Popen(
+            ["ssh", "-q",
+             "-o", "PasswordAuthentication=No",
+             "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no",
+             f"{user}@{host}", cmd], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            shell=False).communicate(timeout=timeout)
+
+        out = stdout_data.decode().rstrip()
+
+        # print(out)
+        if out == search:
+            print(host)
+    except subprocess.TimeoutExpired:
+        pass
+
+
+def main():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("search", nargs=1)
+    parser.add_argument("user", nargs=1)
+
+    args = parser.parse_args()
+
+    search = args.search[0]
+    user = args.user[0]
+
+    # search = "mrb"
+    # user = "root"
+
+    hosts = [f"192.168.1.{i}" for i in range(0, 255)]
+
+    # with ThreadPool(num_ip) as pool:
+    #     pool.map(lambda h: check_host(search, user, h), hosts)
+
+    # check_host(search, user, hosts[87])
+
+    for host in hosts:
+        _t = threading.Thread(target=check_host, args=(search, user, host))
+        _t.start()
+
+
+if __name__ == "__main__":
+    main()

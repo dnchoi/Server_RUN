@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+
+import argparse
+import os
+import sys
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+from py.util import get_opt_split
+
+
+def main():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--host", type=str, default="jetson")
+    parser.add_argument("script", nargs=1)
+
+    exec_args, script_args = get_opt_split(parser)
+
+    host = exec_args.host
+
+    host_setup = {
+        "pi":
+            f". enable_conda.sh;\n"
+            f". enable_openvino.sh;\n"
+            f"conda activate tflite;\n",
+        "jetson": ""
+    }
+
+    host_python = {
+        "pi": "python",
+        "jetson": "python3"
+    }
+
+    local_proj_path = os.getcwd()
+    server_proj_path = os.path.relpath(local_proj_path, os.path.expanduser("~"))
+
+    py_cmd = f"{host_python[host]} {exec_args.script[0]} {' '.join(script_args)}"
+
+    cmd = ""
+
+    cmd += f"rsync -avz {local_proj_path} {host}:{os.path.dirname(server_proj_path)} --exclude='.git/';\n"
+
+    cmd += "killall gst-launch-1.0;\n"
+    cmd += "gst-launch-1.0 -v udpsrc port=5000 ! application/x-rtp, media=video, clock-rate=90000, encoding-name=JPEG" \
+           ", payload=26 ! rtpjpegdepay ! jpegdec ! xvimagesink sync=0 &\n"
+
+    cmd += f"ssh {host} '\n" + \
+        host_setup[host] + \
+        f"cd {server_proj_path};\n" \
+        f"{py_cmd};\n" \
+        "'\n"
+
+    print(cmd)
+    os.system(cmd)
+
+
+if __name__ == "__main__":
+    main()

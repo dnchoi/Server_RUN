@@ -1,0 +1,80 @@
+#!/usr/bin/env python
+
+import argparse
+import os
+import sys
+
+
+def get_exec_args():
+    argv = sys.argv[1:]
+    if "--" in argv:
+        argv = argv[:argv.index("--")]
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--venv", type=str, default=None)
+    parser.add_argument("--server", type=str)
+    parser.add_argument("script", nargs=1)
+
+    args = parser.parse_args(argv)
+
+    return args
+
+
+def get_script_args():
+    argv = sys.argv
+
+    if "--" in argv:
+        argv = argv[argv.index("--") + 1:]
+    else:
+        argv = []
+
+    parser = argparse.ArgumentParser()  # 0 or 1
+
+    args, unknownargs = parser.parse_known_args(argv)
+
+    return unknownargs
+
+
+def main():
+    exec_args = get_exec_args()
+    script_args = get_script_args()
+
+    user_dir = "~"
+
+    ssh_host = exec_args.server
+    virt_env = exec_args.venv
+    conda_prof_path = f"{user_dir}/anaconda3/etc/profile.d/conda.sh"
+
+    local_proj_path = os.getcwd()
+    server_proj_path = local_proj_path
+    script_path = exec_args.script[0]
+
+    python_name = "python"
+
+    if ssh_host == "pi":
+        server_proj_path = server_proj_path.replace("kevin", "pi")
+        python_name = "python3"
+
+    script_args_str = " ".join(script_args)
+
+    if virt_env is not None:
+        virt_env_cmd = f". {conda_prof_path};"\
+                       f"conda activate {virt_env};"
+    else:
+        virt_env_cmd = ""
+
+    cmd = \
+        f"rsync -arvz {local_proj_path} {ssh_host}:{os.path.dirname(server_proj_path)} && " \
+        f"ssh {ssh_host} '" \
+        f"{virt_env_cmd}" \
+        f"cd {server_proj_path};" \
+        f"{python_name} {script_path} {script_args_str};" \
+        f"';" \
+
+    print(cmd)
+    os.system(cmd)
+
+
+if __name__ == "__main__":
+    main()

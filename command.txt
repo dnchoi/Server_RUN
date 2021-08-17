@@ -1,0 +1,54 @@
+#command
+
+#VCGPU2
+python3 server_run --server vcgpu2-0 --venv yolov5 train.py --subdir ~/project/yolov5  -- --img-size 1280 --epoch 99999 --data ./data/yolov5s6_bdd_8cls.yaml --cfg ./models/hub/yolov5s6_bdd_8cls.yaml --name 1280_bdd_8cls_yolov5s6 --cache --device 0 --batch-size 64
+python3 server_run --server vcgpu2-1 --venv yolov5 train.py --subdir ~/project/yolov5  -- --img-size 320 --epoch 99999 --data ./data/yolov5s6_bdd_8cls.yaml --cfg ./models/hub/yolov5s6_bdd_8cls.yaml --name 320_bdd_8cls_yolov5s6 --cache --device 1 --batch-size 256
+python3 server_run --server vcgpu2-1 --venv yolov5 train.py --subdir ~/project/yolov5  -- --img-size 512 --epoch 99999 --data ./data/yolov5s6_bdd_8cls.yaml --cfg ./models/hub/yolov5s6_bdd_8cls.yaml --name 320_bdd_8cls_yolov5s6 --cache --device 1 --batch-size 128
+python3 server_run --server vcgpu2-0,1 --venv yolov5 train.py --subdir ~/project/yolov5  -- --img-size 640 --epoch 99999 --data ./data/yolov5s6_widerface.yaml --cfg ./models/hub/yolov5s6_widerface.yaml --name wider_face_640_yolov5s6 --cache --device 0,1 --batch-size 128
+
+python server_run --server vcgpu2-0 --venv yolov5 --subdir /home/luke/project/yolov5 train.py -- --img-size 640 --epoch 99999 --data /home/luke/project/yolov5/data/yolov5xs_mask_face.yaml --cfg /home/luke/project/yolov5/models/yolov5xs_mask_face.yaml --name 640_mask_face_yolov5xs_all-images --device 0 --batch-size 64
+python server_run --server vcgpu2-0 --venv yolov5 --subdir /home/luke/project/yolov5 train.py -- --img-size 640 --epoch 99999 --data /home/luke/project/yolov5/data/yolov5xs_mask_face.yaml --cfg /home/luke/project/yolov5/models/yolov5xs_mask_face.yaml --name 640_mask_face_yolov5xs_all-images --device 0 --batch-size 64
+python server_run --server vcgpu2-0 --venv yolov5 --subdir /home/luke/project/yolov5 train.py -- --img-size 320 --epoch 99999 --data /home/luke/project/yolov5/data/yolov5xs_mask_face.yaml --cfg /home/luke/project/yolov5/models/yolov5xs_mask_face.yaml --name 416_mask_face_yolov5xs_all-images --device 0 --batch-size 128
+python server_run --server vcgpu2-0 --venv yolov5 --subdir /home/luke/project/yolov5 train.py -- --img-size 320 --epoch 99999 --data /home/luke/project/yolov5/data/yolov5xs_wider_face.yaml --cfg /home/luke/project/yolov5/models/yolov5xs_wider_face_c3.yaml --name 320_wider_face_c3_yolov5xs --device 0 --batch-size 448
+
+python server_run --server vcgpu2-0 --venv yolov5 --subdir /home/luke/project/yolov5 train.py -- --img-size 640 --epoch 99999 --data /home/luke/project/yolov5/data/yolov5xs_wider_face.yaml --cfg /home/luke/project/yolov5/models/yolov5xs_wider_face_c3.yaml --name cdn_640_wider_face_c3_yolov5xs --device 0 --batch-size 92
+
+python server_run --server vcgpu2-1 --venv yolov5 --subdir /home/luke/project/yolov5 train.py -- --img-size 640 --epoch 300 --data /home/luke/project/yolov5/data/yolov5xs_wider_face.yaml --cfg /home/luke/project/yolov5/models/yolov5xs_wider_face_bottleneck.yaml --name cdn_640_wider_face_bottl_wider_face_bottlenect
+
+CUDA_VISIBLE_DEVICES=0,1 python train.py --img-size 320 --epoch 99999 --data ./data/yolov5s_coco_bdd.yaml --cfg ./models/yolov5s_8cls.yaml --name dod_finetune_coco_bdd  --device 0,1 --batch-size 248 --weights ./weights/2021-08-13-09-28-29-dod_finetune_coco_bdd/best.pt 
+
+#TODO bdd coco vcgpu2
+./server_run --server vcgpu2-0,1 --venv k_yolo train.py --subdir /home/luke/project/kevin_yolov5  -- --img-size 320 --epoch 99999 --data /home/luke/project/kevin_yolov5/data/yolov5s_coco_bdd.yaml --cfg /home/luke/project/kevin_yolov5/models/yolov5s_8cls.yaml --name dod_finetuen_coco_bdd_2 --device 0,1 --batch-size 248
+#TODO bdd coco kevin vcgpu1
+./server_run --server kevin_vcgpu-0,1 --venv torch train.py --subdir /home/kevin/Documents/projects/yolov5/ -- --img-size 1280,720 --epoch 99999 --data /home/kevin/Documents/projects/yolov5/data/bdd100k_vehpers.yaml --cfg /home/kevin/Documents/projects/yolov5/models/yolov5s_8cls.yaml --name dod_finetune_bdd --cache --device 0,1 --batch-size 128
+
+#NIPA
+python3 server_run --server nipa-0,1 --venv arcface --subdir /home/ubuntu/insightface/recognition/ArcFace train.py -- --network r100 --loss arcface --dataset emore --pretrained ./models/r100-arcface-emore/model --per-batch-size 224
+python3 server_run --server nipa-0,1 --venv arcface --subdir /home/ubuntu/insightface/recognition/ArcFace train.py -- --network r100 --loss arcface --dataset emore --per-batch-size 224
+
+
+python3 server_run --server nipa-0,1 --venv arcface_torch --subdir /home/ubuntu/insightface/recognition/arcface_torch train.py -- -m torch.distributed.launch --nproc_per_node=8 --nnodes=1 --node_rank=0 --master_addr="127.0.0.1" --master_port=1234
+
+
+#DNGPU
+python3 server_run --server dngpu-0 --venv yolo --subdir /home/dngpu/project/yolov5 train.py -- --img-size 640 --epoch 99999 --data ./data/yolov5s6_bdd_8cls.yaml --cfg ./models/hub/yolov5s6_bdd_8cls.yaml --name 640_bdd_8cls_yolov5s6 --cache --device 0 --batch-size 80
+python server_run --server dngpu-0 --venv yolo --subdir /home/funzin/SSD1/old_project/yolov5 train.py -- --img-size 640 --epoch 99999 --data /home/funzin/SSD1/old_project/yolov5/data/yolov5s6_mask_face.yaml --cfg /home/funzin/SSD1/old_project/yolov5/models/hub/yolov5s6_maks_face.yaml --name 640_mask_face_yolov5s6 --device 0 --batch-size 32
+python server_run --server dngpu-1 --venv yolo --subdir /home/funzin/SSD1/old_project/kevin_yolov5 train.py -- --img-size 640 --epoch 99999 --data /home/funzin/SSD1/old_project/kevin_yolov5/data/yolov5sx_mask_face.yaml --cfg /home/funzin/SSD1/old_project/kevin_yolov5/models/yolov5xs_mask_face.yaml --name 640_mask_face_yolov5s6 --device 1 --batch-size 64
+
+
+python server_run --server dngpu-0 --venv yolo --subdir /home/funzin/SSD1/old_project/yolov5 train.py -- --img-size 640 --epoch 99999 --data /home/funzin/SSD1/old_project/yolov5/data/yolov5s6_mask_face.yaml --cfg /home/funzin/SSD1/old_project/yolov5/models/hub/yolov5s6_maks_face.yaml --name 640_bdd_8cls_yolov5s6 --device 0 --batch-size 32
+
+python server_run --server dngpu-0 --venv yolo --subdir /home/funzin/SSD1/old_project/kevin_yolov5 train.py -- --img-size 640 --epoch 99999 --data /home/funzin/SSD1/old_project/kevin_yolov5/data/yolov5xs_mask_face.yaml --cfg /home/funzin/SSD1/old_project/kevin_yolov5/models/yolov5xs_mask_face.yaml --name 640_mask_face_yolov5xs --device 0 --batch-size 32
+
+python server_run --server dngpu-1 --venv yolo --subdir /home/funzin/SSD1/old_project/yolov5 train.py -- --img-size 640 --epoch 99999 --data /home/funzin/SSD1/old_project/yolov5/data/yolov5s6_widerface.yaml --cfg /home/funzin/SSD1/old_project/yolov5/models/hub/yolov5s6_widerface.yaml --name gray_wider_face_640_yolov5s6 --batch-size 64
+python server_run --server dngpu-0 --venv yolo --subdir /home/funzin/SSD1/old_project/yolov5 train.py -- --img-size 640 --epoch 99999 --data /home/funzin/SSD1/old_project/yolov5/data/yolov5s6_widerface.yaml --cfg /home/funzin/SSD1/old_project/yolov5/models/hub/yolov5s6_widerface.yaml --name gray_wider_face_640_yolov5s6 --batch-size 32 --cache
+python server_run --server dngpu-0 --venv yolo --subdir /home/funzin/SSD1/old_project/yolov5 train.py -- --img-size 640 --epoch 99999 --data /home/funzin/SSD1/old_project/yolov5/data/yolov5xs_mask_face.yaml --cfg /home/funzin/SSD1/old_project/yolov5/models/yolov5xs_mask_face.yaml --name gray_mask_face_640_yolov5xs --batch-size 64
+
+python server_run --server dngpu-0 --venv yolo --subdir /home/funzin/SSD1/old_project/yolov5 train.py -- --img-size 640 --epoch 99999 --data /home/funzin/SSD1/old_project/yolov5/data/yolov5s6_widerface.yaml --cfg /home/funzin/SSD1/old_project/yolov5/models/hub/yolov5s6_widerface.yaml --name gray_wider_face_640_yolov5s6 --batch-size 64 --resume --device 0
+
+python server_run --server dngpu-0 --venv lane --subdir /home/funzin/SSD1/LaneDetection_End2End/Backprojection_Loss main.py -- --image_dir ../../datasets/Tusimple_Lane/DATASET/images/ --gt_dir ../../datasets/Tusimple_Lane/DATASET/ground_truth/ --end_to_end True --num_train 2535 --test_dir ../../datasets/Tusimple_Lane/DATASET/ --cuda 1 --loss_policy backproject
+python main.py --image_dir ../../datasets/Tusimple_Lane/DATASET/images/ --gt_dir ../../datasets/Tusimple_Lane/DATASET/ground_truth/ --end_to_end True --num_train 2535 --test_dir ../../datasets/Tusimple_Lane/DATASET/ --cuda 1 --loss_policy backproject
+
+
+python server_run --server dngpu-0 --venv yolo --subdir /home/funzin/SSD1/yolov5 train.py -- --img-size 640 --epoch 99999 --data /home/funzin/SSD1/yolov5/data/yolov5xs_coco_4cls.yaml --cfg /home/funzin/SSD1/yolov5/models/yolov5xs_coco_4cls.yaml --name 2021-07-28-4cls-coco-5xs-640 --batch-size 64 --device 0
+
