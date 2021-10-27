@@ -19,13 +19,14 @@ CUDA_VISIBLE_DEVICES=0,1 python train.py --img-size 320 --epoch 99999 --data ./d
 
 #TODO bdd coco vcgpu2
 ./server_run --server vcgpu2-0,1 --venv k_yolo train.py --subdir /home/luke/project/kevin_yolov5  -- --img-size 320 --epoch 99999 --data /home/luke/project/kevin_yolov5/data/yolov5s_coco_bdd.yaml --cfg /home/luke/project/kevin_yolov5/models/yolov5s_8cls.yaml --name dod_finetuen_coco_bdd_2 --device 0,1 --batch-size 248
+./server_run --server vcgpu2-0,1 --venv yolov5 train.py --subdir /home/luke/project/yolov5  -- --img-size 640 --epoch 99999 --data /home/luke/project/kevin_yolov5/data/yolov5s6_bdd_8cls.yaml --cfg /home/luke/project/yolov5/models/yolov5s_bdd_8cls.yaml --name bdd_8cls_640_s_model --device 0,1 --batch-size 64
 #TODO bdd coco kevin vcgpu1
 ./server_run --server kevin_vcgpu-0,1 --venv torch train.py --subdir /home/kevin/Documents/projects/yolov5/ -- --img-size 1280,720 --epoch 99999 --data /home/kevin/Documents/projects/yolov5/data/bdd100k_vehpers.yaml --cfg /home/kevin/Documents/projects/yolov5/models/yolov5s_8cls.yaml --name dod_finetune_bdd --cache --device 0,1 --batch-size 128
 
 #NIPA
 python3 server_run --server nipa-0,1 --venv arcface --subdir /home/ubuntu/insightface/recognition/ArcFace train.py -- --network r100 --loss arcface --dataset emore --pretrained ./models/r100-arcface-emore/model --per-batch-size 224
 python3 server_run --server nipa-0,1 --venv arcface --subdir /home/ubuntu/insightface/recognition/ArcFace train.py -- --network r100 --loss arcface --dataset emore --per-batch-size 224
-
+./server_run --server nipa-0,1,2 --venv arcface --subdir /home/ubuntu/insightface/recognition/ArcFace train.py -- --network r100 --loss arcface --dataset emore --per-batch-size 224
 
 python3 server_run --server nipa-0,1 --venv arcface_torch --subdir /home/ubuntu/insightface/recognition/arcface_torch train.py -- -m torch.distributed.launch --nproc_per_node=8 --nnodes=1 --node_rank=0 --master_addr="127.0.0.1" --master_port=1234
 
@@ -52,3 +53,8 @@ python main.py --image_dir ../../datasets/Tusimple_Lane/DATASET/images/ --gt_dir
 
 python server_run --server dngpu-0 --venv yolo --subdir /home/funzin/SSD1/yolov5 train.py -- --img-size 640 --epoch 99999 --data /home/funzin/SSD1/yolov5/data/yolov5xs_coco_4cls.yaml --cfg /home/funzin/SSD1/yolov5/models/yolov5xs_coco_4cls.yaml --name 2021-07-28-4cls-coco-5xs-640 --batch-size 64 --device 0
 
+
+CUDA_VISIBLE_DEVICES=0 python train.py --img 640 --epochs 99999 --data /home/luke/ws/try_code/yolov5/data/yolov5xs_mask_face.yaml --cfg /home/luke/ws/try_code/yolov5/models/yolov5l_mask_face.yaml --weights "" --device 0 --name yolov5m_maskface_640_2cls --batch-size 12
+
+python server_run --server vcgpu3-0,1 --venv yolov5 --subdir /home/funzin/SSD1/yolov5 train.py -- --img-size 640 --epoch 99999 --data /home/funzin/SSD1/yolov5/data/yolov5xs_coco_4cls.yaml --cfg /home/funzin/SSD1/yolov5/models/yolov5xs_coco_4cls.yaml --name 2021-07-28-4cls-coco-5xs-640 --batch-size 64 --device 0
+./server_run --server vcgpu3-0,1 --venv yolov5 train.py --subdir /home/luke/project/yolov5  -- --img-size 640 --epoch 99999 --data /home/luke/project/yolov5/data/yolov5xs_mask_face.yaml --cfg /home/luke/project/yolov5/models/yolov5l_mask_face.yaml --name maskface_2cls_640_m_model --device 0,1 --batch-size 64

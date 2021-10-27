@@ -30,10 +30,11 @@ def main():
         "nipa",
         "vcgpu",
         "vcgpu2",
-        "vcgpu3"
+        "vcgpu3",
+        "vcgpu4"
     ]
 
-    gpu_count = 2
+    gpu_count = [3, 2, 2, 2, 1]
 
     gpu_server_idx_pid_cmdline = []
 
@@ -48,7 +49,7 @@ def main():
 
     for server_idx, server in enumerate(servers):
         out += f"{server}:\n"
-        for gpu_idx in range(gpu_count):
+        for gpu_idx in range(gpu_count[server_idx]):
             process_name = [f"({line[1]}) {line[2]}" for line in gpu_server_idx_pid_cmdline[server_idx] if line[0] == str(gpu_idx)]
 
             process_name = "\n".join(process_name) if len(process_name) > 0 else "free"
